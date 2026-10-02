@@ -2,91 +2,59 @@
 <html lang="cs">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>LEGO Technic – micro:bit BLE test</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>LEGO Technic Control</title>
 <style>
-body{font-family:system-ui,sans-serif;max-width:520px;margin:0 auto;padding:24px;text-align:center;background:#f4f5f7}
-.card{background:#fff;padding:24px;border-radius:18px;box-shadow:0 4px 20px #0002}
-button{font-size:20px;padding:16px 20px;margin:8px;border:0;border-radius:14px;min-width:220px}
-#connect{background:#222;color:#fff}
-#send{background:#ddd}
-#send:disabled{opacity:.45}
-#status{font-weight:700;margin:18px 0;overflow-wrap:anywhere}
-small{display:block;margin-top:20px;color:#555}
+body{font-family:system-ui,sans-serif;background:#f2f3f5;margin:0;padding:24px;text-align:center}
+main{max-width:520px;margin:auto;background:white;padding:24px;border-radius:18px;box-shadow:0 4px 20px #0002}
+button{font-size:20px;padding:16px 22px;margin:8px;border:0;border-radius:14px}
+#connect{background:#222;color:#fff} #send{background:#ddd}
+#send:disabled{opacity:.45} #status{margin:18px 0;font-weight:700;overflow-wrap:anywhere}
 </style>
 </head>
-<body>
-<div class="card">
+<body><main>
 <h1>LEGO Technic</h1>
-<p>micro:bit Bluetooth UART – test</p>
+<p>micro:bit Bluetooth UART</p>
 <button id="connect">Připojit micro:bit</button>
 <div id="status">Nepřipojeno</div>
 <button id="send" disabled>Poslat F</button>
-<small>Po odeslání má micro:bit zobrazit F.</small>
-</div>
-
+</main>
 <script>
-const UART_SERVICE = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
-const UART_RX      = '6e400003-b5a3-f393-e0a9-e50e24dcca9e';
+const UART_SERVICE_UUID="6e400001-b5a3-f393-e0a9-e50e24dcca9e";
+const UART_TX_CHARACTERISTIC_UUID="6e400002-b5a3-f393-e0a9-e50e24dcca9e";
+const UART_RX_CHARACTERISTIC_UUID="6e400003-b5a3-f393-e0a9-e50e24dcca9e";
 
-let device = null;
-let rx = null;
+let uBitDevice;
+let rxCharacteristic;
+const status=document.getElementById("status");
+const send=document.getElementById("send");
 
-const statusEl = document.getElementById('status');
-const sendBtn = document.getElementById('send');
+document.getElementById("connect").onclick=async()=>{
+ try{
+  status.textContent="Hledám micro:bit…";
+  uBitDevice=await navigator.bluetooth.requestDevice({
+   filters:[{namePrefix:"BBC micro:bit"}],
+   optionalServices:[UART_SERVICE_UUID]
+  });
+  status.textContent="Připojuji…";
+  const server=await uBitDevice.gatt.connect();
+  const service=await server.getPrimaryService(UART_SERVICE_UUID);
+  const txCharacteristic=await service.getCharacteristic(UART_TX_CHARACTERISTIC_UUID);
+  await txCharacteristic.startNotifications();
+  rxCharacteristic=await service.getCharacteristic(UART_RX_CHARACTERISTIC_UUID);
+  uBitDevice.addEventListener("gattserverdisconnected",()=>{
+   status.textContent="Odpojeno"; send.disabled=true; rxCharacteristic=null;
+  });
+  status.textContent="Připojeno: "+(uBitDevice.name||"micro:bit");
+  send.disabled=false;
+ }catch(e){status.textContent="Chyba: "+e.message;}
+};
 
-document.getElementById('connect').addEventListener('click', async () => {
-  try {
-    if (!window.isSecureContext)
-      throw new Error('Stránka neběží v zabezpečeném kontextu HTTPS.');
-    if (!navigator.bluetooth)
-      throw new Error('Tento prohlížeč nepodporuje Web Bluetooth.');
-
-    statusEl.textContent = 'Hledám micro:bit…';
-
-    device = await navigator.bluetooth.requestDevice({
-      filters: [{ namePrefix: 'BBC micro:bit' }],
-      optionalServices: [UART_SERVICE]
-    });
-
-    device.addEventListener('gattserverdisconnected', () => {
-      statusEl.textContent = 'Micro:bit odpojen';
-      sendBtn.disabled = true;
-      rx = null;
-    });
-
-    statusEl.textContent = 'Připojuji k ' + (device.name || 'micro:bit') + '…';
-
-    const server = await device.gatt.connect();
-    const service = await server.getPrimaryService(UART_SERVICE);
-    rx = await service.getCharacteristic(UART_RX);
-
-    statusEl.textContent = 'Připojeno: ' + (device.name || 'micro:bit');
-    sendBtn.disabled = false;
-
-  } catch (err) {
-    statusEl.textContent = 'Chyba: ' + (err.message || err);
-    console.error(err);
-  }
-});
-
-sendBtn.addEventListener('click', async () => {
-  try {
-    if (!rx) throw new Error('Micro:bit není připojen.');
-    const data = new TextEncoder().encode('F\n');
-
-    if (typeof rx.writeValueWithoutResponse === 'function') {
-      await rx.writeValueWithoutResponse(data);
-    } else {
-      await rx.writeValue(data);
-    }
-
-    statusEl.textContent = 'Odesláno: F';
-  } catch (err) {
-    statusEl.textContent = 'Chyba při odesílání: ' + (err.message || err);
-    console.error(err);
-  }
-});
+document.getElementById("send").onclick=async()=>{
+ try{
+  await rxCharacteristic.writeValue(new TextEncoder().encode("F\n"));
+  status.textContent="Odesláno: F";
+ }catch(e){status.textContent="Chyba: "+e.message;}
+};
 </script>
-</body>
-</html>
+</body></html>
