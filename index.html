@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>LEGO Technic – micro:bit BLE test</title>
+<style>
+  body{font-family:system-ui,sans-serif;max-width:520px;margin:0 auto;padding:24px;text-align:center;background:#f4f5f7}
+  .card{background:white;padding:24px;border-radius:18px;box-shadow:0 4px 20px #0002}
+  button{font-size:20px;padding:16px 20px;margin:8px;border:0;border-radius:14px;min-width:210px}
+  #connect{background:#222;color:white}
+  #send{background:#ddd}
+  #send:disabled{opacity:.45}
+  #status{font-weight:700;margin:18px 0}
+  small{display:block;margin-top:20px;color:#555}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>LEGO Technic</h1>
+<p>Test micro:bit Bluetooth UART</p>
+<button id="connect">Připojit micro:bit</button>
+<div id="status">Nepřipojeno</div>
+<button id="send" disabled>Poslat F</button>
+<small>Po odeslání má micro:bit zobrazit F.</small>
+</div>
+
+<script>
+const UART_SERVICE = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+// micro:bit RX characteristic = data z telefonu DO micro:bitu
+const UART_RX = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
+
+let device, rx;
+
+const statusEl = document.getElementById('status');
+const sendBtn = document.getElementById('send');
+
+document.getElementById('connect').addEventListener('click', async () => {
+  try {
+    if (!navigator.bluetooth) throw new Error('Tento prohlížeč nepodporuje Web Bluetooth.');
+    statusEl.textContent = 'Hledám micro:bit…';
+
+    device = await navigator.bluetooth.requestDevice({
+      filters: [{ services: [UART_SERVICE] }]
+    });
+
+    device.addEventListener('gattserverdisconnected', () => {
+      statusEl.textContent = 'Odpojeno';
+      sendBtn.disabled = true;
+    });
+
+    statusEl.textContent = 'Připojuji…';
+    const server = await device.gatt.connect();
+    const service = await server.getPrimaryService(UART_SERVICE);
+    rx = await service.getCharacteristic(UART_RX);
+
+    statusEl.textContent = 'Připojeno: ' + (device.name || 'micro:bit');
+    sendBtn.disabled = false;
+  } catch (e) {
+    statusEl.textContent = 'Chyba: ' + e.message;
+  }
+});
+
+sendBtn.addEventListener('click', async () => {
+  try {
+    const data = new TextEncoder().encode('F\n');
+    if (rx.writeValueWithoutResponse) {
+      await rx.writeValueWithoutResponse(data);
+    } else {
+      await rx.writeValue(data);
+    }
+    statusEl.textContent = 'Odesláno: F';
+  } catch (e) {
+    statusEl.textContent = 'Chyba při odesílání: ' + e.message;
+  }
+});
+</script>
+</body>
+</html>
