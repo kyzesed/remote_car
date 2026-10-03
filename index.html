@@ -3,12 +3,13 @@
 
 <head>
     <meta charset="utf-8">
+
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1, user-scalable=no"
     >
 
-    <title>LEGO Technic</title>
+    <title>LEGO Technic Control</title>
 
     <style>
         * {
@@ -17,341 +18,322 @@
         }
 
         body {
-            font-family: system-ui;
-            background: #f2f3f5;
             margin: 0;
-            padding: 18px;
+            min-height: 100vh;
+            font-family: system-ui, sans-serif;
+            background: #111;
+            color: white;
             text-align: center;
         }
 
         main {
-            max-width: 620px;
+            max-width: 900px;
             margin: auto;
-            background: white;
             padding: 20px;
-            border-radius: 20px;
         }
 
-        button {
-            border: 0;
-            border-radius: 15px;
-            font-weight: 700;
+        h1 {
+            margin-bottom: 5px;
         }
 
         #connect {
-            font-size: 19px;
-            padding: 14px 20px;
-            background: #222;
-            color: white;
+            border: 0;
+            border-radius: 14px;
+            padding: 14px 24px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
         }
 
         #status {
-            margin: 14px;
-            font-weight: 700;
+            margin: 14px 0 25px;
+            font-weight: bold;
         }
 
-        .controls {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 18px;
+        .controllers {
+            display: flex;
+            justify-content: space-around;
+            gap: 30px;
+            flex-wrap: wrap;
         }
 
-        .panel {
-            background: #f4f4f4;
-            border-radius: 18px;
-            padding: 14px;
+        .controller {
+            flex: 1;
+            min-width: 260px;
         }
 
-        .steer {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
+        .controller h2 {
+            margin-bottom: 15px;
         }
 
-        .drive {
-            display: grid;
-            gap: 8px;
+        .joystick {
+            width: 240px;
+            height: 240px;
+            margin: auto;
+            position: relative;
+
+            border-radius: 50%;
+            background: #292929;
+
+            border: 3px solid #555;
         }
 
-        .cmd {
-            min-height: 82px;
-            font-size: 30px;
-            background: #ddd;
+        .stick {
+            width: 90px;
+            height: 90px;
+
+            position: absolute;
+
+            left: 75px;
+            top: 75px;
+
+            border-radius: 50%;
+
+            background: #eee;
+
+            box-shadow:
+                0 5px 15px rgba(0, 0, 0, 0.5);
         }
 
-        .stop {
-            background: #222;
-            color: white;
+        .value {
+            margin-top: 15px;
+            font-size: 22px;
+            font-weight: bold;
         }
 
         .disabled {
-            opacity: 0.4;
+            opacity: 0.35;
             pointer-events: none;
         }
 
-        @media (max-width: 480px) {
-            .controls {
-                grid-template-columns: 1fr;
-            }
+        .stop {
+            margin-top: 30px;
+
+            width: 180px;
+            height: 60px;
+
+            border: 0;
+            border-radius: 15px;
+
+            font-size: 20px;
+            font-weight: bold;
+
+            background: #d62828;
+            color: white;
         }
+
     </style>
 </head>
 
+
 <body>
 
-    <main>
+<main>
 
-        <h1>LEGO Technic</h1>
+    <h1>LEGO Technic</h1>
 
-        <p>micro:bit Bluetooth UART</p>
-
-        <button id="connect">
-            Připojit micro:bit
-        </button>
-
-        <div id="status">
-            Nepřipojeno
-        </div>
+    <div>
+        micro:bit Bluetooth Control
+    </div>
 
 
-        <div
-            id="controls"
-            class="controls disabled"
-        >
-
-            <!-- ŘÍZENÍ -->
-
-            <section class="panel">
-
-                <h2>ŘÍZENÍ</h2>
-
-                <div class="steer">
-
-                    <button
-                        class="cmd"
-                        data-c="L"
-                    >
-                        ⬅️
-                    </button>
-
-                    <button
-                        class="cmd"
-                        data-c="C"
-                    >
-                        ⬆️
-                    </button>
-
-                    <button
-                        class="cmd"
-                        data-c="R"
-                    >
-                        ➡️
-                    </button>
-
-                </div>
-
-            </section>
+    <button id="connect">
+        Připojit micro:bit
+    </button>
 
 
-            <!-- POHON -->
+    <div id="status">
+        Nepřipojeno
+    </div>
 
-            <section class="panel">
 
-                <h2>POHON</h2>
+    <div
+        id="controllers"
+        class="controllers disabled"
+    >
 
-                <div class="drive">
 
-                    <button
-                        class="cmd"
-                        data-c="F"
-                    >
-                        ▲
-                    </button>
+        <!-- LEVÝ JOYSTICK -->
 
-                    <button
-                        class="cmd stop"
-                        data-c="S"
-                    >
-                        STOP
-                    </button>
+        <div class="controller">
 
-                    <button
-                        class="cmd"
-                        data-c="B"
-                    >
-                        ▼
-                    </button>
+            <h2>ŘÍZENÍ</h2>
 
-                </div>
+            <div
+                id="steering"
+                class="joystick"
+            >
 
-            </section>
+                <div
+                    id="steeringStick"
+                    class="stick"
+                ></div>
+
+            </div>
+
+            <div
+                id="steeringValue"
+                class="value"
+            >
+                0
+            </div>
 
         </div>
 
-    </main>
 
 
-    <script>
+        <!-- PRAVÝ JOYSTICK -->
 
-        // Nordic UART Service používaná micro:bitem
+        <div class="controller">
 
-        const UART_SERVICE =
-            "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
+            <h2>PLYN</h2>
 
-        const UART_TX =
-            "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
+            <div
+                id="throttle"
+                class="joystick"
+            >
 
-        const UART_RX =
-            "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
+                <div
+                    id="throttleStick"
+                    class="stick"
+                ></div>
 
+            </div>
 
-        let device;
-        let rx;
+            <div
+                id="throttleValue"
+                class="value"
+            >
+                0
+            </div>
 
-
-        const statusElement =
-            document.querySelector("#status");
-
-        const controls =
-            document.querySelector("#controls");
-
-
-        // --------------------------------------------------
-        // PŘIPOJENÍ MICRO:BITU
-        // --------------------------------------------------
-
-        document.querySelector("#connect").onclick =
-            async () => {
-
-                try {
-
-                    statusElement.textContent =
-                        "Hledám micro:bit…";
+        </div>
 
 
-                    device =
-                        await navigator.bluetooth.requestDevice({
-
-                            filters: [
-                                {
-                                    namePrefix: "BBC micro:bit"
-                                }
-                            ],
-
-                            optionalServices: [
-                                UART_SERVICE
-                            ]
-
-                        });
+    </div>
 
 
-                    statusElement.textContent =
-                        "Připojuji…";
+    <button
+        id="stop"
+        class="stop"
+    >
+        STOP
+    </button>
 
 
-                    const server =
-                        await device.gatt.connect();
+</main>
 
 
-                    const service =
-                        await server.getPrimaryService(
-                            UART_SERVICE
-                        );
+<script>
+
+    // =====================================================
+    // MICRO:BIT BLUETOOTH UART
+    // =====================================================
+
+    const UART_SERVICE =
+        "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
+
+    const UART_TX =
+        "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
+
+    const UART_RX =
+        "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
 
 
-                    const tx =
-                        await service.getCharacteristic(
-                            UART_TX
-                        );
+    let device;
+    let rx;
 
 
-                    await tx.startNotifications();
+    const statusElement =
+        document.querySelector("#status");
+
+    const controllers =
+        document.querySelector("#controllers");
 
 
-                    rx =
-                        await service.getCharacteristic(
-                            UART_RX
-                        );
+    // =====================================================
+    // PŘIPOJENÍ
+    // =====================================================
 
-
-                    controls.classList.remove(
-                        "disabled"
-                    );
-
-
-                    statusElement.textContent =
-                        "Připojeno: " +
-                        (device.name || "micro:bit");
-
-
-                    // Reakce na ztrátu spojení
-
-                    device.addEventListener(
-                        "gattserverdisconnected",
-                        () => {
-
-                            rx = null;
-
-                            controls.classList.add(
-                                "disabled"
-                            );
-
-                            statusElement.textContent =
-                                "Odpojeno";
-
-                        }
-                    );
-
-                }
-
-                catch (error) {
-
-                    statusElement.textContent =
-                        "Chyba: " + error.message;
-
-                }
-
-            };
-
-
-        // --------------------------------------------------
-        // ODESLÁNÍ PŘÍKAZU
-        // --------------------------------------------------
-
-        async function sendCommand(command) {
-
-            if (!rx) {
-                return;
-            }
-
+    document.querySelector("#connect").onclick =
+        async () => {
 
             try {
 
-                const data =
-                    new TextEncoder().encode(
-                        command + "\n"
-                    );
+                statusElement.textContent =
+                    "Hledám micro:bit…";
 
 
-                if (rx.writeValueWithoutResponse) {
+                device =
+                    await navigator.bluetooth.requestDevice({
 
-                    await rx.writeValueWithoutResponse(
-                        data
-                    );
+                        filters: [
+                            {
+                                namePrefix: "BBC micro:bit"
+                            }
+                        ],
 
-                }
+                        optionalServices: [
+                            UART_SERVICE
+                        ]
 
-                else {
-
-                    await rx.writeValue(
-                        data
-                    );
-
-                }
+                    });
 
 
                 statusElement.textContent =
-                    "Odesláno: " + command;
+                    "Připojuji…";
+
+
+                const server =
+                    await device.gatt.connect();
+
+
+                const service =
+                    await server.getPrimaryService(
+                        UART_SERVICE
+                    );
+
+
+                const tx =
+                    await service.getCharacteristic(
+                        UART_TX
+                    );
+
+
+                await tx.startNotifications();
+
+
+                rx =
+                    await service.getCharacteristic(
+                        UART_RX
+                    );
+
+
+                controllers.classList.remove(
+                    "disabled"
+                );
+
+
+                statusElement.textContent =
+                    "Připojeno: " +
+                    (device.name || "micro:bit");
+
+
+                device.addEventListener(
+                    "gattserverdisconnected",
+                    () => {
+
+                        rx = null;
+
+                        controllers.classList.add(
+                            "disabled"
+                        );
+
+                        statusElement.textContent =
+                            "Odpojeno";
+
+                    }
+                );
 
             }
 
@@ -362,31 +344,291 @@
 
             }
 
+        };
+
+
+    // =====================================================
+    // ODESLÁNÍ DAT DO MICRO:BITU
+    // =====================================================
+
+    async function sendCommand(command) {
+
+        if (!rx) {
+            return;
         }
 
 
-        // --------------------------------------------------
-        // TLAČÍTKA OVLADAČE
-        // --------------------------------------------------
+        try {
 
-        document
-            .querySelectorAll("[data-c]")
-            .forEach(button => {
+            const data =
+                new TextEncoder().encode(
+                    command + "\n"
+                );
 
-                button.onpointerdown =
-                    event => {
 
-                        event.preventDefault();
+            if (rx.writeValueWithoutResponse) {
 
-                        sendCommand(
-                            button.dataset.c
-                        );
+                await rx.writeValueWithoutResponse(
+                    data
+                );
 
-                    };
+            }
 
-            });
+            else {
 
-    </script>
+                await rx.writeValue(
+                    data
+                );
+
+            }
+
+        }
+
+        catch (error) {
+
+            statusElement.textContent =
+                "Chyba: " + error.message;
+
+        }
+
+    }
+
+
+    // =====================================================
+    // ŘÍZENÍ
+    // =====================================================
+
+    createJoystick(
+        "steering",
+        "steeringStick",
+        "steeringValue",
+        "steering"
+    );
+
+
+    // =====================================================
+    // PLYN
+    // =====================================================
+
+    createJoystick(
+        "throttle",
+        "throttleStick",
+        "throttleValue",
+        "throttle"
+    );
+
+
+    // =====================================================
+    // FUNKCE JOYSTICKU
+    // =====================================================
+
+    function createJoystick(
+        areaID,
+        stickID,
+        valueID,
+        type
+    ) {
+
+        const area =
+            document.getElementById(areaID);
+
+        const stick =
+            document.getElementById(stickID);
+
+        const value =
+            document.getElementById(valueID);
+
+
+        let active = false;
+
+
+        area.addEventListener(
+            "pointerdown",
+            start
+        );
+
+
+        area.addEventListener(
+            "pointermove",
+            move
+        );
+
+
+        area.addEventListener(
+            "pointerup",
+            stop
+        );
+
+
+        area.addEventListener(
+            "pointercancel",
+            stop
+        );
+
+
+        function start(event) {
+
+            active = true;
+
+            area.setPointerCapture(
+                event.pointerId
+            );
+
+            update(event);
+
+        }
+
+
+        function move(event) {
+
+            if (!active) {
+                return;
+            }
+
+            update(event);
+
+        }
+
+
+        function stop() {
+
+            active = false;
+
+
+            stick.style.transform =
+                "translate(0px, 0px)";
+
+
+            value.textContent =
+                "0";
+
+
+            if (type === "steering") {
+
+                sendCommand(
+                    "S:0"
+                );
+
+            }
+
+
+            if (type === "throttle") {
+
+                sendCommand(
+                    "M:0"
+                );
+
+            }
+
+        }
+
+
+        function update(event) {
+
+            const rect =
+                area.getBoundingClientRect();
+
+
+            const centerX =
+                rect.width / 2;
+
+            const centerY =
+                rect.height / 2;
+
+
+            let x =
+                event.clientX -
+                rect.left -
+                centerX;
+
+
+            let y =
+                event.clientY -
+                rect.top -
+                centerY;
+
+
+            const max =
+                70;
+
+
+            if (type === "steering") {
+
+                x =
+                    Math.max(
+                        -max,
+                        Math.min(max, x)
+                    );
+
+
+                stick.style.transform =
+                    `translate(${x}px, 0px)`;
+
+
+                const steering =
+                    Math.round(
+                        x / max * 100
+                    );
+
+
+                value.textContent =
+                    steering;
+
+
+                sendCommand(
+                    "S:" + steering
+                );
+
+            }
+
+
+            if (type === "throttle") {
+
+                y =
+                    Math.max(
+                        -max,
+                        Math.min(max, y)
+                    );
+
+
+                stick.style.transform =
+                    `translate(0px, ${y}px)`;
+
+
+                const throttle =
+                    Math.round(
+                        -y / max * 100
+                    );
+
+
+                value.textContent =
+                    throttle;
+
+
+                sendCommand(
+                    "M:" + throttle
+                );
+
+            }
+
+        }
+
+    }
+
+
+    // =====================================================
+    // NOUZOVÝ STOP
+    // =====================================================
+
+    document.querySelector("#stop").onclick =
+        () => {
+
+            sendCommand("M:0");
+            sendCommand("S:0");
+
+        };
+
+</script>
 
 </body>
 
