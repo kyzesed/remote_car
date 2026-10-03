@@ -1,60 +1,393 @@
 <!doctype html>
 <html lang="cs">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>LEGO Technic Control</title>
-<style>
-body{font-family:system-ui,sans-serif;background:#f2f3f5;margin:0;padding:24px;text-align:center}
-main{max-width:520px;margin:auto;background:white;padding:24px;border-radius:18px;box-shadow:0 4px 20px #0002}
-button{font-size:20px;padding:16px 22px;margin:8px;border:0;border-radius:14px}
-#connect{background:#222;color:#fff} #send{background:#ddd}
-#send:disabled{opacity:.45} #status{margin:18px 0;font-weight:700;overflow-wrap:anywhere}
-</style>
+    <meta charset="utf-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1, user-scalable=no"
+    >
+
+    <title>LEGO Technic</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            touch-action: none;
+        }
+
+        body {
+            font-family: system-ui;
+            background: #f2f3f5;
+            margin: 0;
+            padding: 18px;
+            text-align: center;
+        }
+
+        main {
+            max-width: 620px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+        }
+
+        button {
+            border: 0;
+            border-radius: 15px;
+            font-weight: 700;
+        }
+
+        #connect {
+            font-size: 19px;
+            padding: 14px 20px;
+            background: #222;
+            color: white;
+        }
+
+        #status {
+            margin: 14px;
+            font-weight: 700;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .panel {
+            background: #f4f4f4;
+            border-radius: 18px;
+            padding: 14px;
+        }
+
+        .steer {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .drive {
+            display: grid;
+            gap: 8px;
+        }
+
+        .cmd {
+            min-height: 82px;
+            font-size: 30px;
+            background: #ddd;
+        }
+
+        .stop {
+            background: #222;
+            color: white;
+        }
+
+        .disabled {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        @media (max-width: 480px) {
+            .controls {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
-<body><main>
-<h1>LEGO Technic</h1>
-<p>micro:bit Bluetooth UART</p>
-<button id="connect">Připojit micro:bit</button>
-<div id="status">Nepřipojeno</div>
-<button id="send" disabled>Poslat F</button>
-</main>
-<script>
-const UART_SERVICE_UUID="6e400001-b5a3-f393-e0a9-e50e24dcca9e";
-const UART_TX_CHARACTERISTIC_UUID="6e400002-b5a3-f393-e0a9-e50e24dcca9e";
-const UART_RX_CHARACTERISTIC_UUID="6e400003-b5a3-f393-e0a9-e50e24dcca9e";
 
-let uBitDevice;
-let rxCharacteristic;
-const status=document.getElementById("status");
-const send=document.getElementById("send");
+<body>
 
-document.getElementById("connect").onclick=async()=>{
- try{
-  status.textContent="Hledám micro:bit…";
-  uBitDevice=await navigator.bluetooth.requestDevice({
-   filters:[{namePrefix:"BBC micro:bit"}],
-   optionalServices:[UART_SERVICE_UUID]
-  });
-  status.textContent="Připojuji…";
-  const server=await uBitDevice.gatt.connect();
-  const service=await server.getPrimaryService(UART_SERVICE_UUID);
-  const txCharacteristic=await service.getCharacteristic(UART_TX_CHARACTERISTIC_UUID);
-  await txCharacteristic.startNotifications();
-  rxCharacteristic=await service.getCharacteristic(UART_RX_CHARACTERISTIC_UUID);
-  uBitDevice.addEventListener("gattserverdisconnected",()=>{
-   status.textContent="Odpojeno"; send.disabled=true; rxCharacteristic=null;
-  });
-  status.textContent="Připojeno: "+(uBitDevice.name||"micro:bit");
-  send.disabled=false;
- }catch(e){status.textContent="Chyba: "+e.message;}
-};
+    <main>
 
-document.getElementById("send").onclick=async()=>{
- try{
-  await rxCharacteristic.writeValue(new TextEncoder().encode("F\n"));
-  status.textContent="Odesláno: F";
- }catch(e){status.textContent="Chyba: "+e.message;}
-};
-</script>
-</body></html>
+        <h1>LEGO Technic</h1>
+
+        <p>micro:bit Bluetooth UART</p>
+
+        <button id="connect">
+            Připojit micro:bit
+        </button>
+
+        <div id="status">
+            Nepřipojeno
+        </div>
+
+
+        <div
+            id="controls"
+            class="controls disabled"
+        >
+
+            <!-- ŘÍZENÍ -->
+
+            <section class="panel">
+
+                <h2>ŘÍZENÍ</h2>
+
+                <div class="steer">
+
+                    <button
+                        class="cmd"
+                        data-c="L"
+                    >
+                        ⬅️
+                    </button>
+
+                    <button
+                        class="cmd"
+                        data-c="C"
+                    >
+                        ⬆️
+                    </button>
+
+                    <button
+                        class="cmd"
+                        data-c="R"
+                    >
+                        ➡️
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- POHON -->
+
+            <section class="panel">
+
+                <h2>POHON</h2>
+
+                <div class="drive">
+
+                    <button
+                        class="cmd"
+                        data-c="F"
+                    >
+                        ▲
+                    </button>
+
+                    <button
+                        class="cmd stop"
+                        data-c="S"
+                    >
+                        STOP
+                    </button>
+
+                    <button
+                        class="cmd"
+                        data-c="B"
+                    >
+                        ▼
+                    </button>
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </main>
+
+
+    <script>
+
+        // Nordic UART Service používaná micro:bitem
+
+        const UART_SERVICE =
+            "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
+
+        const UART_TX =
+            "6e400002-b5a3-f393-e0a9-e50e24dcca9e";
+
+        const UART_RX =
+            "6e400003-b5a3-f393-e0a9-e50e24dcca9e";
+
+
+        let device;
+        let rx;
+
+
+        const statusElement =
+            document.querySelector("#status");
+
+        const controls =
+            document.querySelector("#controls");
+
+
+        // --------------------------------------------------
+        // PŘIPOJENÍ MICRO:BITU
+        // --------------------------------------------------
+
+        document.querySelector("#connect").onclick =
+            async () => {
+
+                try {
+
+                    statusElement.textContent =
+                        "Hledám micro:bit…";
+
+
+                    device =
+                        await navigator.bluetooth.requestDevice({
+
+                            filters: [
+                                {
+                                    namePrefix: "BBC micro:bit"
+                                }
+                            ],
+
+                            optionalServices: [
+                                UART_SERVICE
+                            ]
+
+                        });
+
+
+                    statusElement.textContent =
+                        "Připojuji…";
+
+
+                    const server =
+                        await device.gatt.connect();
+
+
+                    const service =
+                        await server.getPrimaryService(
+                            UART_SERVICE
+                        );
+
+
+                    const tx =
+                        await service.getCharacteristic(
+                            UART_TX
+                        );
+
+
+                    await tx.startNotifications();
+
+
+                    rx =
+                        await service.getCharacteristic(
+                            UART_RX
+                        );
+
+
+                    controls.classList.remove(
+                        "disabled"
+                    );
+
+
+                    statusElement.textContent =
+                        "Připojeno: " +
+                        (device.name || "micro:bit");
+
+
+                    // Reakce na ztrátu spojení
+
+                    device.addEventListener(
+                        "gattserverdisconnected",
+                        () => {
+
+                            rx = null;
+
+                            controls.classList.add(
+                                "disabled"
+                            );
+
+                            statusElement.textContent =
+                                "Odpojeno";
+
+                        }
+                    );
+
+                }
+
+                catch (error) {
+
+                    statusElement.textContent =
+                        "Chyba: " + error.message;
+
+                }
+
+            };
+
+
+        // --------------------------------------------------
+        // ODESLÁNÍ PŘÍKAZU
+        // --------------------------------------------------
+
+        async function sendCommand(command) {
+
+            if (!rx) {
+                return;
+            }
+
+
+            try {
+
+                const data =
+                    new TextEncoder().encode(
+                        command + "\n"
+                    );
+
+
+                if (rx.writeValueWithoutResponse) {
+
+                    await rx.writeValueWithoutResponse(
+                        data
+                    );
+
+                }
+
+                else {
+
+                    await rx.writeValue(
+                        data
+                    );
+
+                }
+
+
+                statusElement.textContent =
+                    "Odesláno: " + command;
+
+            }
+
+            catch (error) {
+
+                statusElement.textContent =
+                    "Chyba: " + error.message;
+
+            }
+
+        }
+
+
+        // --------------------------------------------------
+        // TLAČÍTKA OVLADAČE
+        // --------------------------------------------------
+
+        document
+            .querySelectorAll("[data-c]")
+            .forEach(button => {
+
+                button.onpointerdown =
+                    event => {
+
+                        event.preventDefault();
+
+                        sendCommand(
+                            button.dataset.c
+                        );
+
+                    };
+
+            });
+
+    </script>
+
+</body>
+
+</html>
