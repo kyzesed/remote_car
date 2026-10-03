@@ -6,7 +6,7 @@
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1, user-scalable=no"
+        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
     >
 
     <title>LEGO Technic Control</title>
@@ -17,87 +17,176 @@
             touch-action: none;
         }
 
+        html,
         body {
             margin: 0;
-            min-height: 100vh;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
             font-family: system-ui, sans-serif;
             background: #111;
             color: white;
-            text-align: center;
         }
 
         main {
-            max-width: 900px;
-            margin: auto;
-            padding: 20px;
+            width: 100%;
+            height: 100dvh;
+
+            display: flex;
+            flex-direction: column;
+
+            padding:
+                max(8px, env(safe-area-inset-top))
+                max(12px, env(safe-area-inset-right))
+                max(8px, env(safe-area-inset-bottom))
+                max(12px, env(safe-area-inset-left));
+        }
+
+
+        /* ========================================
+           HORNÍ LIŠTA
+           ======================================== */
+
+        .topbar {
+            flex: 0 0 auto;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 10px;
         }
 
         h1 {
-            margin-bottom: 5px;
+            font-size: clamp(17px, 3vw, 25px);
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        .connection {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         #connect {
             border: 0;
-            border-radius: 14px;
-            padding: 14px 24px;
-            font-size: 18px;
+            border-radius: 10px;
+
+            padding: 9px 14px;
+
+            font-size: 14px;
             font-weight: bold;
-            cursor: pointer;
+
+            background: #eee;
+            color: #111;
         }
 
         #status {
-            margin: 14px 0 25px;
+            font-size: 13px;
             font-weight: bold;
         }
 
-        .controllers {
-            display: flex;
-            justify-content: space-around;
-            gap: 30px;
-            flex-wrap: wrap;
+        #stop {
+            border: 0;
+            border-radius: 10px;
+
+            padding: 10px 18px;
+
+            font-size: 15px;
+            font-weight: bold;
+
+            background: #d62828;
+            color: white;
+        }
+
+
+        /* ========================================
+           OVLADAČE
+           ======================================== */
+
+        #controllers {
+            flex: 1 1 auto;
+
+            min-height: 0;
+
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+
+            gap: clamp(10px, 4vw, 50px);
+
+            align-items: center;
+            justify-items: center;
         }
 
         .controller {
-            flex: 1;
-            min-width: 260px;
+            width: 100%;
+            height: 100%;
+
+            min-width: 0;
+            min-height: 0;
+
+            display: flex;
+            flex-direction: column;
+
+            align-items: center;
+            justify-content: center;
         }
 
         .controller h2 {
-            margin-bottom: 15px;
+            margin: 2px 0 5px;
+
+            font-size: clamp(13px, 2.5vw, 19px);
         }
 
+
+        /* ========================================
+           JOYSTICK
+           ======================================== */
+
         .joystick {
-            width: 240px;
-            height: 240px;
-            margin: auto;
             position: relative;
 
-            border-radius: 50%;
-            background: #292929;
+            width: min(38vw, 58vh, 250px);
+            height: min(38vw, 58vh, 250px);
 
+            max-width: 100%;
+            max-height: 100%;
+
+            border-radius: 50%;
+
+            background: #292929;
             border: 3px solid #555;
+
+            flex-shrink: 1;
         }
 
         .stick {
-            width: 90px;
-            height: 90px;
-
             position: absolute;
 
-            left: 75px;
-            top: 75px;
+            width: 38%;
+            height: 38%;
+
+            left: 31%;
+            top: 31%;
 
             border-radius: 50%;
 
             background: #eee;
 
             box-shadow:
-                0 5px 15px rgba(0, 0, 0, 0.5);
+                0 5px 15px rgba(0, 0, 0, 0.55);
+
+            pointer-events: none;
         }
 
         .value {
-            margin-top: 15px;
-            font-size: 22px;
+            margin-top: 4px;
+
+            font-size: clamp(13px, 2.5vw, 20px);
             font-weight: bold;
         }
 
@@ -106,20 +195,64 @@
             pointer-events: none;
         }
 
-        .stop {
-            margin-top: 30px;
 
-            width: 180px;
-            height: 60px;
+        /* ========================================
+           TELEFON NA VÝŠKU
+           ======================================== */
 
-            border: 0;
-            border-radius: 15px;
+        @media (orientation: portrait) {
 
-            font-size: 20px;
-            font-weight: bold;
+            main {
+                padding: 8px;
+            }
 
-            background: #d62828;
-            color: white;
+            .topbar {
+                flex-wrap: wrap;
+            }
+
+            #controllers {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+
+            .joystick {
+                width: min(43vw, 32vh);
+                height: min(43vw, 32vh);
+            }
+
+            #status {
+                display: none;
+            }
+        }
+
+
+        /* ========================================
+           MALÁ VÝŠKA - TELEFON NALEŽATO
+           ======================================== */
+
+        @media (max-height: 500px) {
+
+            main {
+                padding-top: 5px;
+                padding-bottom: 5px;
+            }
+
+            .topbar {
+                min-height: 38px;
+            }
+
+            .controller h2 {
+                margin: 0 0 3px;
+            }
+
+            .joystick {
+                width: min(32vw, 64vh);
+                height: min(32vw, 64vh);
+            }
+
+            .value {
+                margin-top: 2px;
+            }
         }
 
     </style>
@@ -130,34 +263,56 @@
 
 <main>
 
-    <h1>LEGO Technic</h1>
 
-    <div>
-        micro:bit Bluetooth Control
+    <!-- ========================================
+         HORNÍ LIŠTA
+         ======================================== -->
+
+    <div class="topbar">
+
+        <h1>
+            LEGO Technic
+        </h1>
+
+
+        <div class="connection">
+
+            <button id="connect">
+                Připojit
+            </button>
+
+            <span id="status">
+                Nepřipojeno
+            </span>
+
+        </div>
+
+
+        <button id="stop">
+            STOP
+        </button>
+
     </div>
 
 
-    <button id="connect">
-        Připojit micro:bit
-    </button>
 
-
-    <div id="status">
-        Nepřipojeno
-    </div>
-
+    <!-- ========================================
+         OVLADAČE
+         ======================================== -->
 
     <div
         id="controllers"
-        class="controllers disabled"
+        class="disabled"
     >
 
 
-        <!-- LEVÝ JOYSTICK -->
+        <!-- ŘÍZENÍ -->
 
         <div class="controller">
 
-            <h2>ŘÍZENÍ</h2>
+            <h2>
+                ŘÍZENÍ
+            </h2>
 
             <div
                 id="steering"
@@ -182,11 +337,13 @@
 
 
 
-        <!-- PRAVÝ JOYSTICK -->
+        <!-- PLYN -->
 
         <div class="controller">
 
-            <h2>PLYN</h2>
+            <h2>
+                PLYN
+            </h2>
 
             <div
                 id="throttle"
@@ -209,19 +366,10 @@
 
         </div>
 
-
     </div>
 
-
-    <button
-        id="stop"
-        class="stop"
-    >
-        STOP
-    </button>
-
-
 </main>
+
 
 
 <script>
@@ -251,8 +399,9 @@
         document.querySelector("#controllers");
 
 
+
     // =====================================================
-    // PŘIPOJENÍ
+    // BLUETOOTH PŘIPOJENÍ
     // =====================================================
 
     document.querySelector("#connect").onclick =
@@ -261,7 +410,7 @@
             try {
 
                 statusElement.textContent =
-                    "Hledám micro:bit…";
+                    "Hledám…";
 
 
                 device =
@@ -315,8 +464,7 @@
 
 
                 statusElement.textContent =
-                    "Připojeno: " +
-                    (device.name || "micro:bit");
+                    "Připojeno";
 
 
                 device.addEventListener(
@@ -340,15 +488,20 @@
             catch (error) {
 
                 statusElement.textContent =
-                    "Chyba: " + error.message;
+                    "Chyba";
+
+                alert(
+                    error.message
+                );
 
             }
 
         };
 
 
+
     // =====================================================
-    // ODESLÁNÍ DAT DO MICRO:BITU
+    // ODESLÁNÍ PŘÍKAZU
     // =====================================================
 
     async function sendCommand(command) {
@@ -366,7 +519,10 @@
                 );
 
 
-            if (rx.writeValueWithoutResponse) {
+            if (
+                typeof rx.writeValueWithoutResponse
+                === "function"
+            ) {
 
                 await rx.writeValueWithoutResponse(
                     data
@@ -387,39 +543,16 @@
         catch (error) {
 
             statusElement.textContent =
-                "Chyba: " + error.message;
+                "Chyba komunikace";
 
         }
 
     }
 
 
-    // =====================================================
-    // ŘÍZENÍ
-    // =====================================================
-
-    createJoystick(
-        "steering",
-        "steeringStick",
-        "steeringValue",
-        "steering"
-    );
-
 
     // =====================================================
-    // PLYN
-    // =====================================================
-
-    createJoystick(
-        "throttle",
-        "throttleStick",
-        "throttleValue",
-        "throttle"
-    );
-
-
-    // =====================================================
-    // FUNKCE JOYSTICKU
+    // JOYSTICK
     // =====================================================
 
     function createJoystick(
@@ -492,6 +625,10 @@
 
         function stop() {
 
+            if (!active) {
+                return;
+            }
+
             active = false;
 
 
@@ -523,6 +660,7 @@
         }
 
 
+
         function update(event) {
 
             const rect =
@@ -536,23 +674,36 @@
                 rect.height / 2;
 
 
-            let x =
-                event.clientX -
-                rect.left -
-                centerX;
+            /*
+             * Maximální pohyb páčky se počítá
+             * podle skutečné velikosti joysticku.
+             *
+             * Díky tomu funguje správně i při
+             * změně velikosti displeje.
+             */
 
-
-            let y =
-                event.clientY -
-                rect.top -
-                centerY;
+            const stickRadius =
+                stick.offsetWidth / 2;
 
 
             const max =
-                70;
+                rect.width / 2 -
+                stickRadius -
+                5;
 
+
+
+            // =====================================
+            // ŘÍZENÍ
+            // =====================================
 
             if (type === "steering") {
+
+                let x =
+                    event.clientX -
+                    rect.left -
+                    centerX;
+
 
                 x =
                     Math.max(
@@ -582,7 +733,18 @@
             }
 
 
+
+            // =====================================
+            // PLYN
+            // =====================================
+
             if (type === "throttle") {
+
+                let y =
+                    event.clientY -
+                    rect.top -
+                    centerY;
+
 
                 y =
                     Math.max(
@@ -616,6 +778,28 @@
     }
 
 
+
+    // =====================================================
+    // VYTVOŘENÍ OBOU JOYSTICKŮ
+    // =====================================================
+
+    createJoystick(
+        "steering",
+        "steeringStick",
+        "steeringValue",
+        "steering"
+    );
+
+
+    createJoystick(
+        "throttle",
+        "throttleStick",
+        "throttleValue",
+        "throttle"
+    );
+
+
+
     // =====================================================
     // NOUZOVÝ STOP
     // =====================================================
@@ -623,8 +807,37 @@
     document.querySelector("#stop").onclick =
         () => {
 
-            sendCommand("M:0");
-            sendCommand("S:0");
+            sendCommand(
+                "M:0"
+            );
+
+            sendCommand(
+                "S:0"
+            );
+
+
+            document.getElementById(
+                "steeringStick"
+            ).style.transform =
+                "translate(0px, 0px)";
+
+
+            document.getElementById(
+                "throttleStick"
+            ).style.transform =
+                "translate(0px, 0px)";
+
+
+            document.getElementById(
+                "steeringValue"
+            ).textContent =
+                "0";
+
+
+            document.getElementById(
+                "throttleValue"
+            ).textContent =
+                "0";
 
         };
 
